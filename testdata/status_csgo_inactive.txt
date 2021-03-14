@@ -1,0 +1,11 @@
+hostname: test-hostname
+version : 1.37.8.3/13783 1245/8012 secure  [G:1:2345678]
+udp/ip  : 0.0.0.0:27015  (public ip: 1.2.3.4)
+os      :  Linux
+type    :  community dedicated
+map     : cs_test_map
+players : 0 humans, 0 bots (20/0 max) (hibernating)
+
+# userid name uniqueid connected ping loss state rate adr
+#end
+L 01/01/2021 - 00:00:00: rcon from "127.0.0.1:49222": command "status"

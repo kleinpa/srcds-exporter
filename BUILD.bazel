@@ -1,0 +1,26 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("@bazel_gazelle//:def.bzl", "gazelle")
+
+# gazelle:prefix github.com/kleinpa/srcds_exporter
+gazelle(name = "gazelle")
+
+go_library(
+    name = "srcds_collector",
+    srcs = [
+        "srcds_collector.go",
+        "srcds_stats.go",
+    ],
+    importpath = "github.com/kleinpa/srcds-exporter",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_gorcon_rcon//:go_default_library",
+        "@com_github_prometheus_client_golang//prometheus",
+    ],
+)
+
+go_test(
+    name = "srcds_stats_test",
+    srcs = ["srcds_stats_test.go"],
+    data = glob(["testdata/**"]),
+    embed = [":srcds_collector"],
+)

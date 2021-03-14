@@ -1,0 +1,17 @@
+hostname: test-hostname
+version : 1.37.8.3/13783 1245/8012 secure  [G:1:2345678]
+udp/ip  : 0.0.0.0:27015  (public ip: 1.2.3.4)
+os      :  Linux
+type    :  community dedicated
+map     : cs_test_map
+players : 2 humans, 4 bots (20/0 max) (not hibernating)
+
+# userid name uniqueid connected ping loss state rate adr
+# 38 1 "player-one" STEAM_0:1:23456789 01:10 62 0 active 196608 10.244.0.1:14144
+# 39 2 "player-two" STEAM_0:1:98765432 01:05 60 0 active 786432 10.244.0.1:17334
+#40 "Dean" BOT active 64
+#41 "Jason" BOT active 64
+#43 "Brandon" BOT active 64
+#44 "Gary" BOT active 64
+#end
+L 01/01/2021 - 00:00:00: rcon from "127.0.0.1:34144": command "status"
