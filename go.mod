@@ -1,9 +1,11 @@
 module github.com/kleinpa/srcds-exporter
 
-go 1.17
+go 1.23
+
+toolchain go1.24.2
 
 require (
-	github.com/gorcon/rcon v1.3.1
+	github.com/gorcon/rcon v1.4.0
 	github.com/prometheus/client_golang v1.8.0
 )
 
