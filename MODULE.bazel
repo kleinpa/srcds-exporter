@@ -18,7 +18,7 @@ use_repo(
 oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
 oci.pull(
     name = "srcds_exporter_distroless_base",
-    digest = "sha256:66d87e170bc2c5e2b8cf853501141c3c55b4e502b8677595c57534df54a68cc5",
+    digest = "sha256:4594d59540d1948417f6ca2829ddd9294493a7c68b7528f4dd459de7f203a750",
     image = "gcr.io/distroless/cc",
     platforms = ["linux/amd64"],
 )
