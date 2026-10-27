@@ -1,0 +1,13 @@
+hostname: exporter-itest
+version : 9540945/24 9540945 secure
+udp/ip  : ?.?.?.?:?  (public IP from Steam: 1.2.3.4)
+steamid : [A:1:477770752:52146] (90295958389797888)
+map     : de_dust2 at: 0 x, 0 y, 0 z
+tags    : bots,startmoney
+players : 0 humans, 4 bots (32 max)
+edicts  : 251 used of 2048 max
+# userid name                uniqueid            connected ping loss state  adr
+#      5 "Bot Calvin"        BOT                                     active
+#      6 "Bot Oliver"        BOT                                     active
+#      7 "Bot Irwin"         BOT                                     active
+#      8 "Bot Will"          BOT                                     active

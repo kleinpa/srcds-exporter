@@ -1,26 +1,99 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
-load("@bazel_gazelle//:def.bzl", "gazelle")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_load", "oci_push")
+load("@rules_pkg//pkg:mappings.bzl", "pkg_files", "strip_prefix")
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
+load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
+load("@rules_python//python:pip.bzl", "compile_pip_requirements")
 
-# gazelle:prefix github.com/kleinpa/srcds_exporter
-gazelle(name = "gazelle")
+DEPS = [
+    "@pypi//prometheus_client",
+    "@pypi//rcon",
+]
 
-go_library(
-    name = "srcds_collector",
-    srcs = [
-        "srcds_collector.go",
-        "srcds_stats.go",
+# bazel run //:requirements.update
+compile_pip_requirements(
+    name = "requirements",
+    src = "requirements.in",
+    requirements_txt = "requirements_lock.txt",
+)
+
+py_library(
+    name = "srcds_exporter_lib",
+    srcs = ["srcds_exporter.py"],
+    deps = DEPS,
+)
+
+py_binary(
+    name = "srcds_exporter",
+    srcs = ["srcds_exporter.py"],
+    deps = [":srcds_exporter_lib"],
+)
+
+py_test(
+    name = "srcds_exporter_test",
+    srcs = ["srcds_exporter_test.py"],
+    data = glob(["testdata/**"]),
+    deps = [":srcds_exporter_lib"],
+)
+
+# Needs Docker and pulls a ~3GB game server image.
+py_test(
+    name = "srcds_exporter_itest",
+    size = "large",
+    srcs = ["srcds_exporter_itest.py"],
+    data = [":load"],
+    env = {"LOAD_IMAGE": "$(rootpath :load)"},
+    tags = [
+        "local",
+        "manual",
     ],
-    importpath = "github.com/kleinpa/srcds-exporter",
-    visibility = ["//visibility:public"],
-    deps = [
-        "@com_github_gorcon_rcon//:go_default_library",
-        "@com_github_prometheus_client_golang//prometheus",
+    deps = DEPS,
+)
+
+# The base image provides the interpreter; the layer only adds /app, which
+# python puts on sys.path as the script's directory.
+pkg_files(
+    name = "app_src",
+    srcs = ["srcds_exporter.py"],
+    prefix = "app",
+)
+
+pkg_files(
+    name = "app_deps",
+    srcs = DEPS,
+    prefix = "app",
+    strip_prefix = strip_prefix.from_pkg("site-packages"),
+)
+
+pkg_tar(
+    name = "layer",
+    srcs = [
+        ":app_deps",
+        ":app_src",
     ],
 )
 
-go_test(
-    name = "srcds_stats_test",
-    srcs = ["srcds_stats_test.go"],
-    data = glob(["testdata/**"]),
-    embed = [":srcds_collector"],
+oci_image(
+    name = "image",
+    base = "@distroless_python_linux_amd64",
+    entrypoint = [
+        "python3",
+        "/app/srcds_exporter.py",
+    ],
+    exposed_ports = ["80/tcp"],
+    tars = [":layer"],
+)
+
+# bazel run //:load
+oci_load(
+    name = "load",
+    image = ":image",
+    repo_tags = ["ghcr.io/kleinpa/srcds-exporter:latest"],
+)
+
+# bazel run //:push
+oci_push(
+    name = "push",
+    image = ":image",
+    remote_tags = ["latest"],
+    repository = "ghcr.io/kleinpa/srcds-exporter",
 )

@@ -1,0 +1,2 @@
+CPU    In_(KB/s)  Out_(KB/s)  Uptime  Map_changes  FPS      Players  Connects
+0.00   0.00       0.00        1       1            100.00   4        7       
