@@ -1,34 +1,29 @@
-# This is a basic workflow to help you get started with Actions
-
 name: Bazel
 
-# Controls when the action will run. 
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
-
-env:
-  IMAGE_NAME: counterstrikesource-server
-  CR_PAT: ${{ secrets.CR_PAT }}
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
-      - uses: actions/checkout@v2
-      - uses: mishas/setup-bazelisk-action@v1
-      - name: Mount bazel cache  # Optional
-        uses: actions/cache@v2
+      - uses: actions/checkout@v7
+      - uses: bazel-contrib/setup-bazel@0.19.1
         with:
-          path: "~/.cache/bazel"
-          key: bazel
-      - run: bazel build //... //cmd/srcds_exporter:srcds_exporter_image.tar
-      - name: Log into registry
-        run: echo "$CR_PAT" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-      - run: |
-          docker load --input bazel-bin/cmd/srcds_exporter/srcds_exporter_image.tar
-          docker tag bazel/cmd/srcds_exporter:srcds_exporter_image ghcr.io/kleinpa/srcds-exporter:latest
-          docker push ghcr.io/kleinpa/srcds-exporter:latest
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
+      - run: bazel test //...
+      - name: Push image
+        if: github.event_name == 'push'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          bazel run //:push
